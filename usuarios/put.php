@@ -1,33 +1,24 @@
 <?php
-//atualiza um administrador
-// Inclui o arquivo de conexão com o banco de dados
+
 require_once '../conexao.php';
 require_once '../headers.php';
 
-// Somente aceita requisição PUT
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+// Só permite PUT
+if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
     echo json_encode(['erro' => 'Método não permitido']);
     exit;
 }
 
-// Lê o corpo da requisição PUT
-// $input = json_decode(file_get_contents('php://input'), true);
-// var_dump($input);
-// exit;
+// Lê o corpo da requisição como JSON
+$input = json_decode(file_get_contents('php://input'), true);
 
 // Validação simples
-$id = $_POST['id'] ?? null;
-$nome = $_POST['nome'] ?? null;
-$email = $_POST['email'] ?? null;
-$senha = $_POST['senha'] ?? null;
-$tipo = $_POST['tipo'] ?? null;
-
-if (!isset($id) || !isset($nome) || !isset($email) || !isset($senha) || !isset($tipo) ) {
-    http_response_code(400);
-    echo json_encode(['erro' => 'Dados inválidos ou ausentes']);
-    exit;
-}
+$id = $input['id'] ?? null;
+$nome = $input['nome'] ?? null;
+$email = $input['email'] ?? null;
+$senha = $input['senha'] ?? null;
+$tipo = $input['tipo'] ?? null;
 
 if (!$id || !$nome || !$email || !$senha || !$tipo) {
     http_response_code(400);
@@ -42,16 +33,77 @@ try {
     $stmt->execute([
         ':nome' => $nome,
         ':email' => $email,
-        ':senha' => password_hash($senha, PASSWORD_DEFAULT), // Sempre salvar senha criptografada
+        ':senha' => password_hash($senha, PASSWORD_DEFAULT),
         ':tipo' => $tipo,
         ':id' => $id
     ]);
-
+    
     echo json_encode(['mensagem' => 'Usuário atualizado com sucesso']);
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['erro' => 'Erro ao atualizar: ' . $e->getMessage()]);
 }
+
+
+
+
+
+
+// //atualiza um administrador
+// // Inclui o arquivo de conexão com o banco de dados
+// require_once '../conexao.php';
+// require_once '../headers.php';
+
+// // Somente aceita requisição PUT
+// if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+//     http_response_code(405);
+//     echo json_encode(['erro' => 'Método não permitido']);
+//     exit;
+// }
+
+// // Lê o corpo da requisição PUT
+// // $input = json_decode(file_get_contents('php://input'), true);
+// // var_dump($input);
+// // exit;
+
+// // Validação simples
+// $id = $_POST['id'] ?? null;
+// $nome = $_POST['nome'] ?? null;
+// $email = $_POST['email'] ?? null;
+// $senha = $_POST['senha'] ?? null;
+// $tipo = $_POST['tipo'] ?? null;
+
+// if (!isset($id) || !isset($nome) || !isset($email) || !isset($senha) || !isset($tipo) ) {
+//     http_response_code(400);
+//     echo json_encode(['erro' => 'Dados inválidos ou ausentes']);
+//     exit;
+// }
+
+// if (!$id || !$nome || !$email || !$senha || !$tipo) {
+//     http_response_code(400);
+//     echo json_encode(['erro' => 'Todos os campos são obrigatórios']);
+//     exit;
+// }
+
+// // Atualiza no banco
+// try {
+//     $sql = "UPDATE usuarios SET nome = :nome, email = :email, senha = :senha, tipo = :tipo WHERE id = :id";
+//     $stmt = $pdo->prepare($sql);
+//     $stmt->execute([
+//         ':nome' => $nome,
+//         ':email' => $email,
+//         ':senha' => password_hash($senha, PASSWORD_DEFAULT), // Sempre salvar senha criptografada
+//         ':tipo' => $tipo,
+//         ':id' => $id
+//     ]);
+
+//     echo json_encode(['mensagem' => 'Usuário atualizado com sucesso']);
+// } catch (PDOException $e) {
+//     http_response_code(500);
+//     echo json_encode(['erro' => 'Erro ao atualizar: ' . $e->getMessage()]);
+// }
+
+
 
 // 1. Pegar o ID da URL (ex: /administrador/5)
 // $id = isset($_GET['id']) ? $_GET['id'] : null;

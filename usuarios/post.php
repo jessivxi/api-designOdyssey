@@ -19,8 +19,8 @@ if (!isset($dados['nome']) || !isset($dados['email']) || !isset($dados['senha'])
 //empty() = não distingue entre não enviado e enviado vazio
 
 // 3. Preparar a query SQL (PROTEJA CONTRA SQL INJECTION!)
-$sql = "INSERT INTO usuarios (nome, email, senha, tipo, ) 
-        VALUES (:nome, :email, :senha, :tipo, )";
+$sql = "INSERT INTO usuarios (nome, email, senha, tipo) 
+        VALUES (:nome, :email, :senha, :tipo )";
 
 // 4. Hash da senha (
 $senhaHash = password_hash($dados['senha'], PASSWORD_DEFAULT);
