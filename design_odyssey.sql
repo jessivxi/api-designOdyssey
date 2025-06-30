@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 27/06/2025 às 22:23
+-- Tempo de geração: 30/06/2025 às 19:55
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -71,6 +71,7 @@ CREATE TABLE `categoria` (
   `id_categoria` int(11) NOT NULL,
   `nome` varchar(50) DEFAULT NULL,
   `descricão` text NOT NULL,
+  `preco_base` int(11) DEFAULT NULL,
   `icone` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -78,8 +79,8 @@ CREATE TABLE `categoria` (
 -- Despejando dados para a tabela `categoria`
 --
 
-INSERT INTO `categoria` (`id_categoria`, `nome`, `descricão`, `icone`) VALUES
-(1, 'Logotipo Empresarial Minimalista', 'Design de logotipos clean e profissionais para empresas', '');
+INSERT INTO `categoria` (`id_categoria`, `nome`, `descricão`, `preco_base`, `icone`) VALUES
+(1, 'Logotipo Empresarial Minimalista', 'Design de logotipos clean e profissionais para empresas', NULL, '');
 
 -- --------------------------------------------------------
 
