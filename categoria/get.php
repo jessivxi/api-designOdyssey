@@ -2,14 +2,16 @@
 require_once '../conexao.php';
 require_once '../headers.php';
 
-//listar categorias
+// Forçar o header JSON
+header('Content-Type: application/json');
 
-//busca o id do servico
+// Listar categorias
 $id = isset($_GET['id']) ? $_GET['id'] : null;
 
-try{
+try {
     if ($id) {
-        $stmt = $pdo->prepare("SELECT * FROM categoria WHERE id = ?");
+        // Busca categoria específica
+        $stmt = $pdo->prepare("SELECT * FROM categoria WHERE id_categoria = ?");
         $stmt->execute([$id]);
         $categoria = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -17,16 +19,16 @@ try{
             echo json_encode($categoria);
         } else {
             http_response_code(404);
-            echo json_encode(['erro' => 'Categorias não encontrado']);
+            echo json_encode(['erro' => 'Categoria não encontrada']);
         }
-    } else{
+    } else {
+        // Lista todas as categorias
         $stmt = $pdo->query("SELECT * FROM categoria");
         $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        echo json_encode($categoria); 
+        echo json_encode($categorias); 
     }
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['message' => 'Erro ao acessar o banco de dados: ' . $e->getMessage()]);
-
+    echo json_encode(['erro' => 'Erro ao acessar o banco de dados: ' . $e->getMessage()]);
 }

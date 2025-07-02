@@ -19,7 +19,7 @@ $sql = "INSERT INTO usuarios (nome, email, senha, tipo)
 
 // 4. Hash da senha (
 $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
-
+ 
 try {
     $stmt = $pdo->prepare($sql);
     
