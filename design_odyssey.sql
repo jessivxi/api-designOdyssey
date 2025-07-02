@@ -129,9 +129,8 @@ INSERT INTO `servicos` (`id`, `id_freelancer`, `id_categoria`, `titulo`, `descri
 --
 
 CREATE TABLE `usuarios` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `nome` varchar(100) NOT NULL,
-  `apelido` varchar(50) DEFAULT NULL COMMENT '@username',
   `email` varchar(100) NOT NULL,
   `senha` varchar(255) NOT NULL,
   `tipo` enum('designer','cliente') NOT NULL

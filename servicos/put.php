@@ -1,58 +1,58 @@
 <?php
-// Conexão com o banco
 require_once '../conexao.php';
-require_once '../headers.php'; // Para definir Content-Type JSON, CORS, etc.
+require_once '../headers.php';
 
-// Somente aceita requisição PUT
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+// Verifica se é PUT
+if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
-    echo json_encode(['erro' => 'Método não permitido']);
+    echo json_encode(['erro' => 'Método não permitido. Use PUT']);
     exit;
 }
 
-// Lê o corpo da requisição PUT
-// $input = json_decode(file_get_contents('php://input'), true);
-// var_dump($input);
-// exit;
+// Recebe os dados JSON do corpo da requisição
+$input = file_get_contents('php://input');
+$dados = json_decode($input, true);
 
-
-// Validação simples
-$id = $_POST['id'] ?? null;
-$titulo = $_POST['titulo'] ?? null;
-$descricao = $_POST['descricao'] ?? null;
-$categoria = $_POST['categoria'] ?? null;
-$preco_base = $_POST['preco_base'] ?? null;
-$pacotes = $_POST['pacotes'] ?? null;
-$data_publicacao = $_POST['data_publicacao'] ?? null;
-
-
-if (!isset($id) || !isset($titulo) || !isset($descricao) || !isset($categoria) || !isset($preco_base) || !isset($pacotes) || !isset($data_publicacao)) {
+// Verificação básica dos campos
+if (empty($dados['id'])) {
     http_response_code(400);
-    echo json_encode(['erro' => 'Dados inválidos ou ausentes']);
+    echo json_encode(['erro' => 'O ID do serviço é obrigatório']);
     exit;
 }
 
-if (!$id || !$titulo || !$descricao || !$categoria || !$preco_base || !$pacotes || !$data_publicacao) {
-    http_response_code(400);
-    echo json_encode(['erro' => 'Todos os campos são obrigatórios']);
-    exit;
+// Campos mínimos necessários
+$camposNecessarios = ['titulo', 'descricao', 'categoria', 'preco_base'];
+foreach ($camposNecessarios as $campo) {
+    if (empty($dados[$campo])) {
+        http_response_code(400);
+        echo json_encode(['erro' => "O campo '$campo' é obrigatório"]);
+        exit;
+    }
 }
 
-// Atualiza no banco
 try {
-    $sql = "UPDATE servico SET titulo = :titulo, descricao = :descricao, categoria = :categoria, preco_base = :preco_base, pacotes = :pacotes, data_publicacao = :data_publicacao WHERE id = :id";
+    $sql = "UPDATE servicos SET 
+            titulo = :titulo, 
+            descricao = :descricao, 
+            categoria = :categoria, 
+            preco_base = :preco_base
+            WHERE id = :id";
+    
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        ':titulo' => $titulo,
-        ':descricao' => $descricao,
-        ':categoria' => $categoria,
-        ':preco_base' => $preco_base,
-        ':pacotes' => $pacotes,
-        ':data_publicacao' => $data_publicacao,
-        ':id' => $id
+        ':titulo' => $dados['titulo'],
+        ':descricao' => $dados['descricao'],
+        ':categoria' => $dados['categoria'],
+        ':preco_base' => $dados['preco_base'],
+        ':id' => $dados['id']
     ]);
 
-    echo json_encode(['mensagem' => 'Administrador atualizado com sucesso']);
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['sucesso' => 'Serviço atualizado com PUT!']);
+    } else {
+        http_response_code(404);
+        echo json_encode(['erro' => 'Nenhum serviço encontrado com este ID']);
+    }
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['erro' => 'Erro ao atualizar: ' . $e->getMessage()]);
