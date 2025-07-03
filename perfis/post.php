@@ -1,40 +1,43 @@
 <?php
-//cria um novo administrador
-// Inclui o arquivo de conexão com o banco de dados
 require_once '../conexao.php';
 require_once '../headers.php';
 
+// Verifica se o método é POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['erro' => 'Use o método POST']);
+    exit;
+}
 
-$nome_exibicao = $_POST['nome_exibicao'];
-$foto = $_POST['foto'];
-$tipo = $_POST['tipo'];
+// Lê o corpo da requisição JSON
+$dados = json_decode(file_get_contents('php://input'), true);
 
-//isset() = detecta se o cliente esqueceu de enviar o campo
-//empty() = não distingue entre não enviado e enviado vazio
+// Verifica se os campos obrigatórios existem
+if (
+    empty($dados['nome_exibicao']) ||
+    empty($dados['foto']) ||
+    empty($dados['tipo']) ||
+    empty($dados['id_usuarios'])
+) {
+    http_response_code(400);
+    echo json_encode(['erro' => 'Todos os campos são obrigatórios, inclusive o ID do usuário']);
+    exit;
+}
 
-// 3. Preparar a query SQL (PROTEJA CONTRA SQL INJECTION!)
-$sql = "INSERT INTO perfil (nome_exibicao, foto, tipo) 
-        VALUES (:nome_exibicao, :foto, :tipo)";
 
 try {
+    // Prepara a query para inserção
+    $sql = "INSERT INTO perfis (nome_exibicao, foto, tipo, id_usuarios) 
+            VALUES (:nome_exibicao, :foto, :tipo, :id_usuarios)";
     $stmt = $pdo->prepare($sql);
-    
-    // 5. Executar a query com os parâmetros
-    $sucesso = $stmt->execute([
-        ':nome_exibicao' => $nome_exibicao,
-        ':foto' => $foto,
-        ':tipo' => $tipo
+    $stmt->execute([
+        ':nome_exibicao' => $dados['nome_exibicao'],
+        ':foto' => $dados['foto'],
+        ':tipo' => $dados['tipo'],
+        ':id_usuarios' => $dados['id_usuarios']
     ]);
 
-    if ($sucesso) {
-        http_response_code(201);
-        echo json_encode([
-            'mensagem' => 'perfil criado com sucesso',
-            'id' => $pdo->lastInsertId() // Retorna o ID do novo servico
-        ]);
-    }
-} catch (PDOException $e) {-
+} catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['erro' => 'Erro ao listar perfil: ' . $e->getMessage()]);
+    echo json_encode(['erro' => 'Erro ao inserir no banco: ' . $e->getMessage()]);
 }
-?>

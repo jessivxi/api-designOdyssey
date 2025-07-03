@@ -7,13 +7,13 @@ require_once '../conexao.php';
 require_once '../headers.php';
 
 
-$dados = $_GET['id'];
+$dados = $_GET['id_categoria'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $id = intval($dados ?? 0);
 
     if ($id > 0) {
-        $stmt = $pdo->prepare("DELETE FROM categoria WHERE id = ?");
+        $stmt = $pdo->prepare("DELETE FROM categoria WHERE id_categoria = ?");
         if ($stmt->execute([$id])) {
             echo json_encode(['success' => true]);
         } else {

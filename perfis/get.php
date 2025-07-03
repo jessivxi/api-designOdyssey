@@ -13,15 +13,15 @@ try{
         $stmt->execute([$id]);
         $perfis = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($perifs) {
+        if ($perfis) {
             echo json_encode($perfis);
         } else {
             http_response_code(404);
             echo json_encode(['erro' => 'serviço não encontrado']);
         }
     } else{
-        $stmt = $pdo->query("SELECT * FROM perfil"); // Seleciona todos os perfis
-        $perfil = $stmt->fetchAll(PDO::FETCH_ASSOC); // Busca todos os perfis
+        $stmt = $pdo->query("SELECT * FROM perfis"); // Seleciona todos os perfis
+        $perfis = $stmt->fetchAll(PDO::FETCH_ASSOC); // Busca todos os perfis
 
         echo json_encode($perfis); 
     }

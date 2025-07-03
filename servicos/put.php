@@ -2,42 +2,38 @@
 require_once '../conexao.php';
 require_once '../headers.php';
 
-// Verifica se é PUT
+// Permite apenas requisição PUT
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
-    echo json_encode(['erro' => 'Método não permitido. Use PUT']);
+    echo json_encode(['erro' => 'Use o método PUT']);
     exit;
 }
 
-// Recebe os dados JSON do corpo da requisição
-$input = file_get_contents('php://input');
-$dados = json_decode($input, true);
+// Lê os dados recebidos em JSON
+$dados = json_decode(file_get_contents('php://input'), true);
 
-// Verificação básica dos campos
-if (empty($dados['id'])) {
+// Verifica se o ID e os principais campos foram enviados
+if (
+    empty($dados['id']) ||
+    empty($dados['titulo']) ||
+    empty($dados['descricao']) ||
+    empty($dados['categoria']) ||
+    empty($dados['preco_base'])
+) {
     http_response_code(400);
-    echo json_encode(['erro' => 'O ID do serviço é obrigatório']);
+    echo json_encode(['erro' => 'Preencha todos os campos obrigatórios']);
     exit;
 }
 
-// Campos mínimos necessários
-$camposNecessarios = ['titulo', 'descricao', 'categoria', 'preco_base'];
-foreach ($camposNecessarios as $campo) {
-    if (empty($dados[$campo])) {
-        http_response_code(400);
-        echo json_encode(['erro' => "O campo '$campo' é obrigatório"]);
-        exit;
-    }
-}
-
+// Atualiza no banco de dados
 try {
     $sql = "UPDATE servicos SET 
-            titulo = :titulo, 
-            descricao = :descricao, 
-            categoria = :categoria, 
-            preco_base = :preco_base
+                titulo = :titulo,
+                descricao = :descricao,
+                categoria = :categoria,
+                preco_base = :preco_base
             WHERE id = :id";
-    
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         ':titulo' => $dados['titulo'],
@@ -47,14 +43,14 @@ try {
         ':id' => $dados['id']
     ]);
 
-    if ($stmt->rowCount() > 0) {
-        echo json_encode(['sucesso' => 'Serviço atualizado com PUT!']);
-    } else {
-        http_response_code(404);
-        echo json_encode(['erro' => 'Nenhum serviço encontrado com este ID']);
-    }
+    echo json_encode([
+        'mensagem' => $stmt->rowCount() > 0
+            ? 'Serviço atualizado com sucesso'
+            : 'Nada foi alterado ou serviço não encontrado'
+    ]);
+
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['erro' => 'Erro ao atualizar: ' . $e->getMessage()]);
+    echo json_encode(['erro' => 'Erro ao atualizar']);
 }
 ?>

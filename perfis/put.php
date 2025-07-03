@@ -1,55 +1,59 @@
 <?php
-// Conexão com o banco
 require_once '../conexao.php';
-require_once '../headers.php'; // Para definir Content-Type JSON, CORS, etc.
+require_once '../headers.php';
 
-// Somente aceita requisição PUT
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
-    echo json_encode(['erro' => 'Método não permitido']);
+    echo json_encode(['erro' => 'Método não permitido. Use PUT']);
     exit;
 }
 
-// Lê o corpo da requisição PUT
-// $input = json_decode(file_get_contents('php://input'), true);
-// var_dump($input);
-// exit;
+// Lê os dados JSON
+$dados = json_decode(file_get_contents('php://input'), true);
 
-
-// Validação simples
-$id = $_POST['id'] ?? null;
-$nome_exibicão = $_POST['perfil'] ?? null;
-$foto = $_POST['foto'] ?? null;
-$tipo = $_POST['tipo'] ?? null;
-
-
-
-if (!isset($id) || !isset($nome_exibicão) || !isset($foto) || !isset($tipo)  ) {
+// Verifica se o ID foi enviado
+if (empty($dados['id_perfil'])) {
     http_response_code(400);
-    echo json_encode(['erro' => 'Dados inválidos ou ausentes']);
+    echo json_encode(['erro' => 'O ID da categoria é obrigatório']);
     exit;
 }
 
-if (!$id || !$titulo || !$descricao || !$preco_base || !$icone) { 
-    http_response_code(400);
-    echo json_encode(['erro' => 'Todos os campos são obrigatórios']);
-    exit;
+// Verifica se os outros campos foram enviados
+$campos = ['nome', 'descricao', 'preco_base', 'icone'];
+foreach ($campos as $campo) {
+    if (empty($dados[$campo])) {
+        http_response_code(400);
+        echo json_encode(['erro' => "O campo '$campo' é obrigatório"]);
+        exit;
+    }
 }
 
-// Atualiza no banco
+// Atualiza a categoria
 try {
-    $sql = "UPDATE categoria SET nome = :titulo, descricao = :descricao, icone = :icone WHERE id = :id";
+    $sql = "UPDATE categoria SET 
+                nome = :nome,
+                descricao = :descricao,
+                preco_base = :preco_base,
+                icone = :icone
+            WHERE id_categoria = :id_categoria";
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        ':nome_exibicão' => $nome_exibicão,
-        ':foto' => $foto,
-        ':tipo' => $tipo,
-        ':id' => $id
+        ':nome' => $dados['nome'],
+        ':descricao' => $dados['descricao'],
+        ':preco_base' => $dados['preco_base'],
+        ':icone' => $dados['icone'],
+        ':id_categoria' => $dados['id_categoria']
     ]);
 
-    echo json_encode(['mensagem' => 'perfil atualizado com sucesso']);
+    if ($stmt->rowCount() > 0) {
+        echo json_encode(['sucesso' => 'Categoria atualizada com sucesso']);
+    } else {
+        http_response_code(404);
+        echo json_encode(['erro' => 'Categoria não encontrada ou dados iguais']);
+    }
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['erro' => 'Erro ao atualizar: ' . $e->getMessage()]);
+    echo json_encode(['erro' => 'Erro no servidor: ' . $e->getMessage()]);
 }
 ?>
