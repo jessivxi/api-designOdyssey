@@ -36,6 +36,11 @@ try {
         ':tipo' => $dados['tipo'],
         ':id_usuarios' => $dados['id_usuarios']
     ]);
+    http_response_code(201);
+    echo json_encode([
+        'mensagem' => 'Perfil criado com sucesso',
+        'id_perfil' => $pdo->lastInsertId() // Retorna o ID do novo perfil
+    ]);
 
 } catch (PDOException $e) {
     http_response_code(500);

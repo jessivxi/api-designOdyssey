@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
     $id = intval($dados ?? 0);
 
     if ($id > 0) {
-        $stmt = $pdo->prepare("DELETE FROM servico WHERE id = ?");
+        $stmt = $pdo->prepare("DELETE FROM servicos WHERE id = ?");
         if ($stmt->execute([$id])) {
             echo json_encode(['success' => true]);
         } else {

@@ -4,23 +4,16 @@ require_once '../headers.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
     http_response_code(405);
-    echo json_encode(['erro' => 'Método não permitido. Use PUT']);
+    echo json_encode(['erro' => 'Use o método PUT']);
     exit;
 }
 
-// Lê os dados JSON
+// Lê o corpo da requisição JSON
 $dados = json_decode(file_get_contents('php://input'), true);
 
-// Verifica se o ID foi enviado
-if (empty($dados['id_perfil'])) {
-    http_response_code(400);
-    echo json_encode(['erro' => 'O ID da categoria é obrigatório']);
-    exit;
-}
-
-// Verifica se os outros campos foram enviados
-$campos = ['nome', 'descricao', 'preco_base', 'icone'];
-foreach ($campos as $campo) {
+// Verificação básica de campos obrigatórios
+$camposObrigatorios = ['id_perfil', 'id_usuarios', 'nome_exibicao', 'foto', 'tipo'];
+foreach ($camposObrigatorios as $campo) {
     if (empty($dados[$campo])) {
         http_response_code(400);
         echo json_encode(['erro' => "O campo '$campo' é obrigatório"]);
@@ -28,29 +21,28 @@ foreach ($campos as $campo) {
     }
 }
 
-// Atualiza a categoria
 try {
-    $sql = "UPDATE categoria SET 
-                nome = :nome,
-                descricao = :descricao,
-                preco_base = :preco_base,
-                icone = :icone
-            WHERE id_categoria = :id_categoria";
+    $sql = "UPDATE perfis SET 
+                nome_exibicao = :nome_exibicao,
+                foto = :foto,
+                tipo = :tipo,
+                id_usuarios = :id_usuarios
+            WHERE id_perfil = :id_perfil";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        ':nome' => $dados['nome'],
-        ':descricao' => $dados['descricao'],
-        ':preco_base' => $dados['preco_base'],
-        ':icone' => $dados['icone'],
-        ':id_categoria' => $dados['id_categoria']
+        ':nome_exibicao' => $dados['nome_exibicao'],
+        ':foto' => $dados['foto'],
+        ':tipo' => $dados['tipo'],
+        ':id_usuarios' => $dados['id_usuarios'],
+        ':id_perfil' => $dados['id_perfil']
     ]);
 
     if ($stmt->rowCount() > 0) {
-        echo json_encode(['sucesso' => 'Categoria atualizada com sucesso']);
+        echo json_encode(['sucesso' => 'Perfil atualizado com sucesso']);
     } else {
         http_response_code(404);
-        echo json_encode(['erro' => 'Categoria não encontrada ou dados iguais']);
+        echo json_encode(['erro' => 'Perfil não encontrado ou dados iguais']);
     }
 } catch (PDOException $e) {
     http_response_code(500);
