@@ -1,6 +1,6 @@
 <?php
-require_once '../headers.php';
-require_once '../conexao.php';
+require_once '/headers.php';
+require_once '/conexao.php';
 
 // Roteamento baseado no método HTTP
 switch ($_SERVER['REQUEST_METHOD']) {

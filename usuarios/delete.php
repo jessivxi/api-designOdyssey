@@ -1,50 +1,28 @@
 <?php
-//deleta um administrador
-// Inclui o arquivo de conexão com o banco de dados
+// Example delete.php
+header("Content-Type: application/json; charset=UTF-8");
+
+// Conexão com o banco
 require_once '../conexao.php';
 require_once '../headers.php';
 
-try {
-    $dados = json_decode(file_get_contents('php://input'), true);
 
-    // Autenticação 
-    $token = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    if (!hash_equals('TOKEN_SEGURO_AQUI', $token)) {
-        http_response_code(403);
-        echo json_encode(['erro' => 'Acesso não autorizado']);
-        exit;
-    }
+$dados = $_GET['id'];
 
-    // Validação do ID
-    if (!isset($dados['id']) || !is_numeric($dados['id']) || $dados['id'] <= 0) {
-        http_response_code(400);
-        echo json_encode(['erro' => 'ID inválido ou não informado']);
-        exit;
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $id = intval($dados ?? 0);
 
-    // Verifica existência antes de deletar
-    $check = $pdo->prepare("SELECT id FROM usuarios WHERE id = ?");
-    $check->execute([$dados['id']]);
-    
-    if (!$check->fetch()) {
-        http_response_code(404);
-        echo json_encode(['erro' => 'usuario não encontrado']);
-        exit;
-    }
-
-    // Executa a exclusão
-    $stmt = $pdo->prepare("DELETE FROM usuario WHERE id = ?");
-    
-    if ($stmt->execute([$dados['id']])) {
-        http_response_code(200);
-        echo json_encode(['sucesso' => 'usuario removido com sucesso']);
+    if ($id > 0) {
+        $stmt = $pdo->prepare("DELETE FROM usuarios WHERE id = ?");
+        if ($stmt->execute([$id])) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Database error']);
+        }
     } else {
-        http_response_code(500);
-        echo json_encode(['erro' => 'Falha ao remover usuario']);
+        echo json_encode(['success' => false, 'message' => 'Invalid ID']);
     }
-    
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['erro' => 'Erro no banco de dados: ' . $e->getMessage()]);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
 ?>
