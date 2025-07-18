@@ -2,6 +2,10 @@
 require_once '../conexao.php';
 require_once '../headers.php';
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+
 // Recebe os dados do corpo da requisição (POST ou JSON)
 $dados = $_POST;
 
@@ -82,7 +86,6 @@ try {
     }
     
     echo json_encode(['sucesso' => 'Serviço criado! ID: ' . $pdo->lastInsertId()]);
-    header('Location: http://localhost/dashboard/designodyssey_amd/servicos/index.php');
     
 } catch (PDOException $e) {
     http_response_code(500);
